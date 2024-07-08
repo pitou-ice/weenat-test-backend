@@ -8,7 +8,7 @@ from utils.datetime import dt_iso_format
 
 def append_data_records(data_records: pd.DataFrame) -> None:
     data_records.to_sql(
-        Tables.DATA_RECORD.value,
+        Tables.DATA_RECORDS.value,
         engine,
         if_exists='append',
         index=False
@@ -23,7 +23,7 @@ def get_all_records_by_datalogger_in_datetime(
     data_records = pd.read_sql(
         f'''
         SELECT *
-        FROM {Tables.DATA_RECORD.value}
+        FROM {Tables.DATA_RECORDS.value}
         WHERE {Columns.DATALOGGER.value}="{datalogger}"
         AND {Columns.MEASURED_AT.value}
         BETWEEN "{pd.to_datetime(since or 0)}"

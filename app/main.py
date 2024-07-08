@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from dotenv import load_dotenv
 
 from routers import data_record
+from models.data_record import create_data_records_table
 from core.constants import DEFAULT_HOST, DEFAULT_PORT, MAIN_APP
 
 
@@ -13,7 +14,7 @@ UVICORN_HOST: Final[str] = os.getenv('UVICORN_HOST', DEFAULT_HOST)
 UVICORN_PORT: Final[int] = int(os.getenv('UVICORN_PORT', DEFAULT_PORT))
 
 
-app = FastAPI()
+app = FastAPI(on_startup=[create_data_records_table])
 app.include_router(data_record.router)
 
 

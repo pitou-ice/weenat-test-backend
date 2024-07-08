@@ -21,7 +21,7 @@ async def create_data_records(data_records: list[DataRecordRequest]) -> dict:
     return {}
 
 
-@router.get('/data')
+@router.get('/data', response_model=list[DataRecordResponse])
 async def read_data(
     datalogger: str,
     since: str | None = None,
@@ -32,15 +32,11 @@ async def read_data(
         since,
         before
     )
-    validated_data_records = [
-        DataRecordResponse.model_validate(data_record)
-        for data_record
-        in data_records.to_dict('records')
-    ]
-    return validated_data_records
+
+    return data_records.to_dict(orient='records')
 
 
-@router.get('/summary')
+@router.get('/summary', response_model=list[DataRecordResponse | DataRecordAggregateResponse])
 async def read_summary(
     datalogger: str,
     since: str | None = None,
@@ -52,15 +48,7 @@ async def read_summary(
         since,
         before
     )
-
-    validation_model = DataRecordResponse
     if span:
-        validation_model = DataRecordAggregateResponse
         data_records = summarize_mean_by_span(data_records, span)
 
-    validated_data_records = [
-        validation_model.model_validate(data_record)
-        for data_record
-        in data_records.to_dict('records')
-    ]
-    return validated_data_records
+    return data_records.to_dict(orient='records')

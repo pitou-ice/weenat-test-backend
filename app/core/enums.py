@@ -15,4 +15,4 @@ class Columns(Enum):
 
 
 class Tables(Enum):
-    DATA_RECORD = 'data_record'
+    DATA_RECORDS = 'data_records'
