@@ -12,12 +12,12 @@ from models.data_record import DataRecordORM
 from core.constants import DEFAULT_HOST, DEFAULT_PORT, MAIN_APP
 
 
+logger = logging.getLogger(__name__)
+
+
 load_dotenv()
 UVICORN_HOST: Final[str] = os.getenv('UVICORN_HOST', DEFAULT_HOST)
 UVICORN_PORT: Final[int] = int(os.getenv('UVICORN_PORT', DEFAULT_PORT))
-
-
-logger = logging.getLogger('uvicorn')
 
 
 @asynccontextmanager

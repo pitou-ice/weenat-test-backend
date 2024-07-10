@@ -2,7 +2,6 @@ import pandas as pd
 
 from core.enums import Columns
 from utils.datetime import dt_iso_format
-from models.data_record import DataRecordORM
 from schemas.data_record_request import DataRecordRequest
 
 
@@ -80,9 +79,8 @@ def extract_data(data_records: list[DataRecordRequest]) -> list[dict]:
     return data_records_df.to_dict(orient='records')
 
 
-def summarize_mean_by_span(data_records: list[DataRecordORM], span: str) -> list[dict]:
-    data_records_df = pd.DataFrame(
-        [record.to_dict() for record in data_records])
+def summarize_mean_by_span(data_records: list[dict], span: str) -> list[dict]:
+    data_records_df = pd.DataFrame(data_records)
 
     data_records_df[Columns.TIME_SLOT.value] =\
         pd.to_datetime(data_records_df[Columns.MEASURED_AT.value])\

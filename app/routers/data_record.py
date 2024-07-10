@@ -60,6 +60,7 @@ async def get_summary(
     )
 
     if span and data_records:
-        data_records = summarize_mean_by_span(data_records, span)
+        data_records_dicts = [record.__dict__ for record in data_records]
+        data_records = summarize_mean_by_span(data_records_dicts, span)
 
     return data_records
