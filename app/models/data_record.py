@@ -1,21 +1,17 @@
-from sqlalchemy.orm import declarative_base, Mapped, mapped_column
+from sqlalchemy import Column, Integer, String, Float
 
 from core.enums import Tables
-from core.database import engine
+from core.database import Base
 
 
-Base = declarative_base()
-
-
-class DataRecordModel(Base):
+class DataRecordORM(Base):
     __tablename__ = Tables.DATA_RECORDS.value
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    datalogger: Mapped[str]
-    measured_at: Mapped[str]
-    label: Mapped[str]
-    value: Mapped[float]
+    id = Column(Integer, primary_key=True, index=True)
+    datalogger = Column(String)
+    label = Column(String)
+    measured_at = Column(String)
+    value = Column(Float)
 
-
-def create_data_records_table():
-    Base.metadata.create_all(bind=engine)
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}

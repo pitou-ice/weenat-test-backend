@@ -1,6 +1,8 @@
 import pandas as pd
 
 from core.enums import Columns
+from utils.datetime import dt_iso_format
+from models.data_record import DataRecordORM
 from schemas.data_record_request import DataRecordRequest
 
 
@@ -11,7 +13,7 @@ TIME_SPANS = {
 }
 
 
-def extract_data(data_records: list[DataRecordRequest]) -> pd.DataFrame:
+def extract_data(data_records: list[DataRecordRequest]) -> list[dict]:
     data_record_df1 = pd.DataFrame(
         [log.model_dump() for log in data_records],
         columns=[
@@ -72,23 +74,30 @@ def extract_data(data_records: list[DataRecordRequest]) -> pd.DataFrame:
         for data_record in data_record_list
     ]).dropna()
 
-    return data_records_df
+    data_records_df[Columns.MEASURED_AT.value] = \
+        dt_iso_format(data_records_df, Columns.MEASURED_AT.value)
+
+    return data_records_df.to_dict(orient='records')
 
 
-def summarize_mean_by_span(data_records: pd.DataFrame, span: str) -> pd.DataFrame:
-    data_records[Columns.MEASURED_AT.value] = pd\
-        .to_datetime(data_records[Columns.MEASURED_AT.value])
+def summarize_mean_by_span(data_records: list[DataRecordORM], span: str) -> list[dict]:
+    data_records_df = pd.DataFrame(
+        [record.to_dict() for record in data_records])
 
-    data_records[Columns.TIME_SLOT.value] = data_records[Columns.MEASURED_AT.value]\
+    data_records_df[Columns.TIME_SLOT.value] =\
+        pd.to_datetime(data_records_df[Columns.MEASURED_AT.value])\
         .dt.floor(TIME_SPANS[span])
 
-    data_records[Columns.TIME_SLOT.value] = data_records[Columns.TIME_SLOT.value]\
-        .apply(lambda t: pd.Timestamp(t).isoformat())
+    data_records_df.drop(columns=[Columns.MEASURED_AT.value], inplace=True)
 
-    grouped_data_records = data_records\
+    grouped_data_records = data_records_df\
         .groupby([Columns.TIME_SLOT.value, Columns.LABEL.value])
 
     agg_df = grouped_data_records\
         .agg({Columns.VALUE.value: 'mean'})\
         .reset_index()
-    return agg_df
+
+    agg_df[Columns.TIME_SLOT.value] = \
+        dt_iso_format(agg_df, Columns.TIME_SLOT.value)
+
+    return agg_df.to_dict(orient='records')
